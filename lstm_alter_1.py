@@ -113,7 +113,7 @@ dataset = scaler.fit_transform(dataset)
 
 
 # split into train and test sets
-train_size = int(len(dataset) * 0.7)
+train_size = int(len(dataset) * 0.73)
 test_size = len(dataset) - train_size
 train, test = dataset[0:train_size,:], dataset[train_size:len(dataset),:]
 # X=t and Y=t+1 时的数据，并且此时的维度为 [samples, features]
