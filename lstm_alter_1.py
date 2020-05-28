@@ -23,6 +23,8 @@ from keras import regularizers
 #单独提取出客流量那一列
 flowdata=pd.read_csv('D:/Event/铁道预测深度学习项目/lstm-emd-spearman算法/两路口进站工作日.csv',header=None, usecols=[1])
 flowdata.to_csv('D:/Event/铁道预测深度学习项目/lstm-emd-spearman算法/imf1.csv',index=None,columns=None,header=None)
+plt.figure('原数据')
+plt.plot(flowdata)
 #载入到时间序列数据
 data = pd.read_csv('D:/Event/铁道预测深度学习项目/lstm-emd-spearman算法/imf1.csv',header=None)
 #EMD经验模态分解
@@ -60,7 +62,7 @@ weights = []
 for i in range(shift_number):
     data = regnize_data[:,i]
     min_data = min(data[0],data[1])
-    if min_data > 0.2:
+    if min_data > 0.1:
         weights.append(1)
     else:
         weights.append(0)
@@ -111,7 +113,7 @@ dataset = scaler.fit_transform(dataset)
 
 
 # split into train and test sets
-train_size = int(len(dataset) * 0.67)
+train_size = int(len(dataset) * 0.7)
 test_size = len(dataset) - train_size
 train, test = dataset[0:train_size,:], dataset[train_size:len(dataset),:]
 # X=t and Y=t+1 时的数据，并且此时的维度为 [samples, features]
@@ -131,7 +133,7 @@ model = Sequential()
 model.add(LSTM(4, input_shape=(1, look_back)))
 model.add(Dense(1))
 model.compile(loss='mean_squared_error', optimizer='adam')
-model.fit(trainX, trainY, epochs=30, batch_size=1, verbose=2)
+model.fit(trainX, trainY, epochs=400, batch_size=100, verbose=2)
 
 # 预测
 # make predictions
@@ -142,6 +144,8 @@ testPredict = model.predict(testX)
 trainPredict = scaler.inverse_transform(trainPredict)
 trainY = scaler.inverse_transform([trainY])
 testPredict = scaler.inverse_transform(testPredict)
+output = pd.DataFrame(testPredict)
+output.to_csv('D:/Event/铁道预测深度学习项目/lstm-emd-spearman算法/predict_data.csv',index=None,columns=None,header=None)
 testY = scaler.inverse_transform([testY])
 # 计算 mean squared error
 trainScore = math.sqrt(mean_squared_error(trainY[0], trainPredict[:,0]))
@@ -166,4 +170,5 @@ plt.plot(scaler.inverse_transform(dataset))  # 将降维后的数据转换成原
 # 将标准化后的数据转换为原始数据。
 plt.plot(trainPredictPlot)
 plt.plot(testPredictPlot)
+plt.savefig('D:/Event/铁道预测深度学习项目/lstm-emd-spearman算法/result.png')
 plt.show()
